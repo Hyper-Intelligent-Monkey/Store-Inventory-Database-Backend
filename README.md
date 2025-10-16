@@ -2,8 +2,8 @@
 
 An inventory management database backend built using Node.js, Express, and MongoDB. Manages Products, Suppliers, Orders, and Users with full CRUD operations.
 
-## By:
-Vinn Runkee Cañares
+### By:
+Vinn Runkee Cañares  
 BSCS 4-2
 
 ### Requirements
