@@ -8,14 +8,3 @@ const productSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('Product', productSchema);
-
-
-productSchema.pre('save', async function(next) {
-  if (!this.productId) {
-    const last = await mongoose.model('Product').findOne().sort('-productId');
-    this.productId = last ? last.productId + 1 : 1000;
-  }
-  next();
-});
-
-module.exports = mongoose.model('Product', productSchema);

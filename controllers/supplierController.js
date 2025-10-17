@@ -8,41 +8,55 @@ exports.getSuppliers = async (req, res) => {
 res.status(500).json({ error: err.message });
 }
 };
+
 // Get supplier by ID
 exports.getSupplier = async (req, res) => {
 try {
-const supplier = await Supplier.findById(req.params.id);
-if (!supplier) return res.status(404).json({ error: 'Supplier not found' });
-res.json(supplier);
+   if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ error: 'Invalid supplier ID format' });
+    }
+   const supplier = await Supplier.findById(req.params.id);
+   if (!supplier) return res.status(404).json({ error: 'Supplier not found' });
+   res.json(supplier);
 } catch (err) {
-res.status(500).json({ error: err.message });
+   res.status(500).json({ error: err.message });
 }
 };
+
 // Create supplier
 exports.createSupplier = async (req, res) => {
 try {
-const newSupplier = await Supplier.create(req.body);
-res.status(201).json(newSupplier);
+   if (!req.body.name || !req.body.contact) {
+      return res.status(400).json({ error: 'Name and contact are required' });
+    }
+   const newSupplier = await Supplier.create(req.body);
+   res.status(201).json(newSupplier);
 } catch (err) {
-res.status(500).json({ error: err.message });
+   res.status(500).json({ error: err.message });
 }
 };
+
 // Update supplier
 exports.updateSupplier = async (req, res) => {
 try {
-const updatedSupplier = await Supplier.findByIdAndUpdate(req.params.id, req.body, { new: true
-});
-res.json(updatedSupplier);
+   if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ error: 'Invalid supplier ID format' });
+    }
+   const updatedSupplier = await Supplier.findByIdAndUpdate(req.params.id, req.body, { new: true});
+   res.json(updatedSupplier);
 } catch (err) {
-res.status(500).json({ error: err.message });
+   res.status(500).json({ error: err.message });
 }
 };
 
 // Delete supplier
 exports.deleteSupplier = async (req, res) => {
 try {
-await Supplier.findByIdAndDelete(req.params.id);
-res.json({ message: 'Supplier deleted' });
+   if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ error: 'Invalid supplier ID format' });
+    }
+   await Supplier.findByIdAndDelete(req.params.id);
+   res.json({ message: 'Supplier deleted' });
 } catch (err) {
    res.status(500).json({ error: err.message });
  }
