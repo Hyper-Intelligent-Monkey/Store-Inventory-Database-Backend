@@ -105,9 +105,9 @@ Inventory_Store/
     {
       "productId": "ObjectId (required)",
       "qty": "number (min: 1, required)",
-      "price": "number (min: 0, required)" 
+      "price": "number" 
     }
   ],
-  "status": "string (enum: pending, approved, shipped, received, cancelled)"
+  "status": "string (enum: pending, completed, cancelled)"
 }
 ```
