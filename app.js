@@ -1,15 +1,13 @@
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
-const dotenv = require('dotenv');
 const morgan = require('morgan');
 const cors = require('cors');
-const {connectDB} = require('./config/db');
+const { connectDB } = require('./config/db');
 
 const supplierRoutes = require('./routes/supplierRoutes');
 const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
-
-dotenv.config();
 
 const app = express();
 

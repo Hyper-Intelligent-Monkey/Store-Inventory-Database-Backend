@@ -8,7 +8,7 @@ const orderSchema = new mongoose.Schema({
         }
     ],
     supplierId: { type: mongoose.Schema.Types.ObjectId, ref: 'Supplier', required: true },
-    status: { type: String, enum: ['pending', 'completed', 'canceled'], default: 'pending' },
+    status: { type: String, enum: ['pending', 'ordered', 'canceled'], default: 'pending' },
     createdAt: { type: Date, default: Date.now }
 });
 

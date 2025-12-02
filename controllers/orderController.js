@@ -13,44 +13,55 @@ exports.getAllOrders = async (req, res) => {
 
 // Get an Order
 exports.getOrder = async (req, res) => {
-try {
-  if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).json({ error: 'Invalid order ID format' });
+  try {
+    if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ error: "Invalid order ID format" });
     }
-  const order = await Order.findById(req.params.id);
-  if (!order) return res.status(404).json({ error: 'Order not found' });
-  res.json(order);
-} catch (err) {
-  res.status(500).json({ error: err.message });
-}
+
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ error: "Order not found" });
+
+    if (order.supplierId.toString() !== req.supplier._id.toString()) {
+      return res.status(403).json({ error: "Unauthorized access" });
+    }
+
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
 // Create an Order
 exports.createOrder = async (req, res) => {
   try {
-    const { items, supplierId } = req.body;
+    const { items } = req.body;
 
+    if (!items || !items.length) {
+      return res.status(400).json({ error: "Order items required" });
+    }
+
+    // Calculate item price
     const populatedItems = await Promise.all(
-      items.map(async (item) => { // Look for the product
+      items.map(async (item) => {
         const product = await Product.findById(item.productId);
-        if (!product) throw new Error('Product not found');
-        const totalPrice = product.price * item.qty; // Multiply the product price to the item quantity to provide the order price
+        if (!product) throw new Error("Product not found");
 
         return {
           productId: item.productId,
           qty: item.qty,
-          price: totalPrice
+          price: product.price * item.qty
         };
       })
     );
 
-    const newOrder = new Order({ // Updates the order with the correct price
+    const newOrder = new Order({
       items: populatedItems,
-      supplierId
+      supplierId: req.supplier._id,  // <-- secure
     });
 
     await newOrder.save();
     res.status(201).json(newOrder);
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -105,11 +116,21 @@ exports.updateOrder = async (req, res) => {
 exports.deleteOrder = async (req, res) => {
   try {
     if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).json({ error: 'Invalid order ID format' });
+      return res.status(400).json({ error: "Invalid order ID format" });
     }
-    await Order.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Order deleted' });
+
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ error: "Order not found" });
+
+    if (order.supplierId.toString() !== req.supplier._id.toString()) {
+      return res.status(403).json({ error: "Unauthorized action" });
+    }
+
+    await order.deleteOne();
+    res.json({ message: "Order deleted" });
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
