@@ -163,3 +163,23 @@ exports.deleteOrder = async (req, res) => {
   }
 };
 
+// Remove Item from Order Pending
+exports.removeOrderItem = async (req, res) => {
+  try {
+    const { orderId, productId } = req.params;
+
+    const order = await Order.findById(orderId);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    // remove item
+    order.items = order.items.filter(
+      item => item.productId.toString() !== productId
+    );
+
+    await order.save();
+
+    res.json({ message: "Item removed", order });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
