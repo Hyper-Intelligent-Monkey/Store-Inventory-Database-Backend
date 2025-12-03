@@ -39,8 +39,8 @@ exports.createOrder = async (req, res) => {
     if (!items || !items.length) {
       return res.status(400).json({ error: "Order items required" });
     }
+    let order = await Order.findOne({ supplierId: req.supplier._id, status: "pending" });
 
-    // Calculate item price
     const populatedItems = await Promise.all(
       items.map(async (item) => {
         const product = await Product.findById(item.productId);
@@ -54,18 +54,33 @@ exports.createOrder = async (req, res) => {
       })
     );
 
-    const newOrder = new Order({
-      items: populatedItems,
-      supplierId: req.supplier._id,  // <-- secure
-    });
+    if (order) {
+      populatedItems.forEach(newItem => {
+        const existingItem = order.items.find(i => i.productId.toString() === newItem.productId.toString());
+        if (existingItem) {
+          existingItem.qty += newItem.qty;
+          existingItem.price += newItem.price;
+        } else {
+          order.items.push(newItem);
+        }
+      });
 
-    await newOrder.save();
-    res.status(201).json(newOrder);
+      await order.save();
+    } else {
+      order = new Order({
+        items: populatedItems,
+        supplierId: req.supplier._id
+      });
+      await order.save();
+    }
+
+    res.status(201).json(order);
 
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 // Update an Order
 exports.updateOrder = async (req, res) => {
