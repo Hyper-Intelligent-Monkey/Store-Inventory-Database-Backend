@@ -1,5 +1,16 @@
 const Product = require('../models/productModel');
 
+// Get My Products
+exports.getMyProducts = async (req, res) => {
+  try {
+    const products = await Product.find({ supplier: req.supplier._id });
+
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 // Get All Products
 exports.getAllProducts = async (req, res) => {
   try {
