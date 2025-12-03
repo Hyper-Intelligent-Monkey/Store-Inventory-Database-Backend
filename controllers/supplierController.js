@@ -108,21 +108,20 @@ exports.updateSupplier = async (req, res) => {
 
 // Delete supplier
 exports.deleteSupplier = async (req, res) => {
-  try {
-    const { id } = req.params;
+   try {
+    const supplierId = req.supplier._id; 
 
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).json({ error: 'Invalid supplier ID format' });
+    if (!supplierId) {
+      return res.status(400).json({ error: 'Supplier ID missing' });
     }
 
-    const supplier = await Supplier.findByIdAndDelete(id);
+    const supplier = await Supplier.findByIdAndDelete(supplierId);
     if (!supplier) return res.status(404).json({ error: 'Supplier not found' });
 
-    await Product.deleteMany({ supplier: id });
+    await Product.deleteMany({ supplier: supplierId });
+    await Order.deleteMany({ supplier: supplierId });
 
-    await Order.deleteMany({ supplier: id });
-
-    res.json({ message: 'Supplier, their products, and orders deleted successfully' });
+    res.json({ message: 'Account and all associated products/orders deleted successfully' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
