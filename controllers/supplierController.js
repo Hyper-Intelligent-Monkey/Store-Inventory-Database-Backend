@@ -1,4 +1,6 @@
 const Supplier = require('../models/supplierModel');
+const Product = require('../models/productModel');
+const Order = require('../models/orderModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
@@ -107,13 +109,22 @@ exports.updateSupplier = async (req, res) => {
 // Delete supplier
 exports.deleteSupplier = async (req, res) => {
   try {
-    if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+    const { id } = req.params;
+
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
       return res.status(400).json({ error: 'Invalid supplier ID format' });
     }
 
-    await Supplier.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Supplier deleted' });
+    const supplier = await Supplier.findByIdAndDelete(id);
+    if (!supplier) return res.status(404).json({ error: 'Supplier not found' });
+
+    await Product.deleteMany({ supplier: id });
+
+    await Order.deleteMany({ supplier: id });
+
+    res.json({ message: 'Supplier, their products, and orders deleted successfully' });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 };
