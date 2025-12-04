@@ -15,10 +15,7 @@ app.use(express.json());
 app.use(bodyParser.json());
 
 app.use(morgan('dev'));
-app.use(cors({
-  origin: 'https://store-front-end-one.vercel.app',
-  credentials: true
-}));
+app.use(cors());
 
 app.use('/api', orderRoutes);
 app.use('/api', productRoutes);

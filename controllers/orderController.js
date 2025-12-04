@@ -5,7 +5,7 @@ const Product = require('../models/productModel');
 exports.getMyPendingOrder = async (req, res) => {
   try {
     const order = await Order.findOne({ supplierId: req.supplier._id, status: "pending" })
-      .populate('items.productId'); // populate product details if needed
+      .populate('items.productId');
 
     if (!order) return res.status(404).json({ message: "No pending order" });
 
